@@ -1,0 +1,1469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>67 Bombs to Enid</title>
+  <meta name="description" content="From Executive Producer Errol Morris. An intimate documentary about survivors of nuclear weapons testing in the Marshall Islands who relocated to rural America.">
+  <meta property="og:title" content="67 Bombs to Enid">
+  <meta property="og:description" content="67 nuclear detonations. One community's fight for survival.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://67bombs.com">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+  <!-- Lenis smooth scroll -->
+  <script src="https://unpkg.com/lenis@1.1.18/dist/lenis.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollToPlugin.min.js" defer></script>
+
+  <style>
+    :root {
+      --black: #000000;
+      --black-rich: #050505;
+      --charcoal: #111111;
+      --graphite: #1a1a1a;
+      --ash: #222222;
+      --smoke: #3a3a3a;
+      --fog: #777777;
+      --mist: #aaaaaa;
+      --cloud: #cccccc;
+      --white: #f0f0f0;
+      --white-pure: #ffffff;
+      --amber: #d4922a;
+      --amber-bright: #e8a838;
+      --amber-hot: #f5b942;
+      --red-burn: #c0392b;
+      --font-display: 'Playfair Display', Georgia, serif;
+      --font-body: 'Inter', -apple-system, sans-serif;
+      --font-mono: 'Space Mono', 'Courier New', monospace;
+      --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-in-out-expo: cubic-bezier(0.87, 0, 0.13, 1);
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html {
+      font-size: 16px;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden;
+    }
+
+    body {
+      background: var(--black);
+      color: var(--white);
+      font-family: var(--font-body);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    ::selection { background: var(--amber); color: var(--black); }
+    a { color: inherit; text-decoration: none; }
+
+    /* ========== GRAIN ========== */
+    .grain {
+      position: fixed; inset: 0; z-index: 9000; pointer-events: none;
+      opacity: 0.04;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 256px 256px;
+    }
+
+    /* ========== CUSTOM CURSOR ========== */
+    .cursor {
+      position: fixed; width: 18px; height: 18px;
+      border: 1.5px solid var(--amber);
+      border-radius: 50%; pointer-events: none; z-index: 10000;
+      transform: translate(-50%, -50%);
+      transition: width 0.4s var(--ease-out-expo), height 0.4s var(--ease-out-expo), border-color 0.3s, background 0.3s;
+      mix-blend-mode: difference;
+    }
+    .cursor.hover { width: 56px; height: 56px; border-color: var(--white-pure); background: rgba(255,255,255,0.05); }
+
+    /* ========== PROGRESS BAR ========== */
+    .progress-bar {
+      position: fixed; top: 0; left: 0; height: 2px; width: 0%;
+      background: var(--amber); z-index: 200;
+      transition: none;
+    }
+
+    /* ========== LOADER ========== */
+    .loader {
+      position: fixed; inset: 0; background: var(--black); z-index: 9999;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+    }
+    .loader.done { opacity: 0; visibility: hidden; transition: opacity 0.6s ease, visibility 0.6s; }
+
+    /* Detonation flash */
+    .flash {
+      position: fixed; inset: 0; z-index: 9998;
+      background: var(--white-pure); pointer-events: none;
+      opacity: 0;
+    }
+
+    .loader-count {
+      font-family: var(--font-display); font-weight: 900;
+      font-size: clamp(5rem, 18vw, 14rem);
+      color: var(--white-pure); line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+    .loader-sub {
+      font-family: var(--font-mono); font-size: 0.6rem;
+      letter-spacing: 0.4em; text-transform: uppercase;
+      color: var(--fog); margin-top: 1.5rem;
+    }
+    .loader-bar { width: 120px; height: 1px; background: var(--ash); margin-top: 1rem; position: relative; overflow: hidden; }
+    .loader-bar-fill { position: absolute; left: 0; top: 0; height: 100%; width: 0%; background: var(--amber); }
+
+    /* ========== NAV ========== */
+    .nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 150;
+      padding: 1.5rem 2.5rem;
+      display: flex; justify-content: space-between; align-items: center;
+      mix-blend-mode: difference;
+    }
+    .nav-logo {
+      font-family: var(--font-mono); font-size: 0.7rem; font-weight: 700;
+      letter-spacing: 0.25em; text-transform: uppercase; color: var(--white-pure);
+    }
+    .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+    .nav-links a {
+      font-family: var(--font-mono); font-size: 0.6rem;
+      letter-spacing: 0.15em; text-transform: uppercase;
+      color: var(--white-pure); position: relative; padding-bottom: 3px;
+    }
+    .nav-links a::after {
+      content: ''; position: absolute; bottom: 0; left: 0;
+      width: 0%; height: 1px; background: var(--amber);
+      transition: width 0.4s var(--ease-out-expo);
+    }
+    .nav-links a:hover::after { width: 100%; }
+
+    /* ========== SECTION: HERO ========== */
+    .hero {
+      position: relative; height: 300vh;
+      background: var(--black);
+    }
+    .hero-pin {
+      position: relative; width: 100%; height: 100vh;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      overflow: hidden;
+    }
+
+    /* Shockwave canvas */
+    .hero-canvas {
+      position: absolute; inset: 0; z-index: 0;
+    }
+
+    .hero-content {
+      position: relative; z-index: 2; text-align: center; padding: 0 2rem;
+    }
+
+    .hero-eyebrow {
+      font-family: var(--font-mono); font-size: 0.6rem;
+      letter-spacing: 0.5em; text-transform: uppercase;
+      color: var(--amber); margin-bottom: 1.5rem;
+      opacity: 0; transform: translateY(20px);
+    }
+
+    /* The big number — variable weight */
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: clamp(7rem, 28vw, 22rem);
+      font-weight: 900; line-height: 0.82;
+      color: var(--white-pure);
+      letter-spacing: -0.04em;
+      perspective: 600px;
+    }
+    .hero-title .n67 { color: var(--amber); display: inline-block; }
+    .hero-title .char {
+      display: inline-block; opacity: 0;
+      transform: translateY(60px) rotateX(-40deg);
+      transform-origin: bottom center;
+    }
+
+    .hero-subtitle {
+      font-family: var(--font-display);
+      font-size: clamp(1.8rem, 5vw, 4.5rem);
+      font-weight: 400; font-style: italic;
+      color: var(--cloud); letter-spacing: 0.05em;
+      margin-top: -0.5rem;
+      opacity: 0; transform: translateY(30px);
+    }
+
+    .hero-tagline {
+      font-family: var(--font-body); font-size: clamp(0.85rem, 1.3vw, 1.05rem);
+      font-weight: 300; color: var(--fog);
+      max-width: 480px; margin: 2.5rem auto 0; line-height: 1.8;
+      opacity: 0;
+    }
+
+    .hero-scroll-cue {
+      position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%);
+      z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+      opacity: 0;
+    }
+    .hero-scroll-cue span {
+      font-family: var(--font-mono); font-size: 0.5rem;
+      letter-spacing: 0.35em; text-transform: uppercase; color: var(--smoke);
+    }
+    .scroll-tick { width: 1px; height: 36px; background: var(--ash); position: relative; overflow: hidden; }
+    .scroll-tick::after {
+      content: ''; position: absolute; top: -100%; left: 0; width: 100%; height: 100%;
+      background: var(--amber); animation: tickDrop 2.2s ease-in-out infinite;
+    }
+    @keyframes tickDrop { 0%{top:-100%} 50%{top:100%} 100%{top:100%} }
+
+    /* ========== INTERSTITIAL: COUNTER MARQUEE ========== */
+    .marquee {
+      padding: 3rem 0; overflow: hidden;
+      border-top: 1px solid var(--ash); border-bottom: 1px solid var(--ash);
+      background: var(--black-rich);
+    }
+    .marquee-track {
+      display: flex; gap: 0; white-space: nowrap;
+      will-change: transform;
+      animation: marqueeScroll 30s linear infinite;
+    }
+    .marquee-item {
+      flex-shrink: 0; padding: 0 3rem;
+      font-family: var(--font-mono); font-size: 0.6rem;
+      letter-spacing: 0.3em; text-transform: uppercase;
+      color: var(--smoke);
+    }
+    .marquee-item .val {
+      font-family: var(--font-display); font-size: 1.6rem; font-weight: 900;
+      color: var(--amber); display: block; line-height: 1; margin-bottom: 0.4rem;
+    }
+    @keyframes marqueeScroll { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+
+    /* ========== SECTION: STORY — PINNED SCROLL NARRATIVE ========== */
+    .story-section {
+      position: relative;
+      background: var(--black);
+    }
+    .story-pin {
+      height: 100vh; display: flex; align-items: center;
+      position: relative; overflow: hidden;
+    }
+    .story-pin-content {
+      max-width: 1100px; margin: 0 auto; padding: 0 3rem;
+      position: relative; z-index: 2;
+    }
+    .story-chapter-label {
+      font-family: var(--font-mono); font-size: 0.55rem;
+      letter-spacing: 0.4em; text-transform: uppercase;
+      color: var(--amber); margin-bottom: 2rem;
+      display: flex; align-items: center; gap: 1rem;
+    }
+    .story-chapter-label::before { content: ''; width: 24px; height: 1px; background: var(--amber); }
+
+    .story-big-text {
+      font-family: var(--font-display);
+      font-size: clamp(2.2rem, 5.5vw, 4.8rem);
+      font-weight: 900; line-height: 1.1;
+      color: var(--white-pure);
+    }
+    .story-big-text .hl { color: var(--amber); font-style: italic; }
+
+    .story-body {
+      font-family: var(--font-body); font-size: 1.05rem;
+      font-weight: 300; line-height: 1.9; color: var(--mist);
+      max-width: 650px; margin-top: 2.5rem;
+    }
+
+    .story-bg-number {
+      position: absolute; right: -5%; top: 50%; transform: translateY(-50%);
+      font-family: var(--font-display); font-size: clamp(15rem, 35vw, 30rem);
+      font-weight: 900; color: var(--amber); opacity: 0.03;
+      line-height: 0.8; z-index: 0; pointer-events: none;
+    }
+
+    /* Pull quote interstitial */
+    .pull-quote-section {
+      min-height: 100vh; display: flex; align-items: center; justify-content: center;
+      position: relative; overflow: hidden;
+      background: var(--black);
+    }
+    .pull-quote-section .pq-bg {
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 50% 50%, rgba(192,57,43,0.06) 0%, transparent 70%);
+    }
+    .pull-quote-text {
+      font-family: var(--font-display);
+      font-size: clamp(1.8rem, 4.5vw, 4rem);
+      font-weight: 700; text-align: center;
+      line-height: 1.2; max-width: 900px; padding: 0 2rem;
+      color: var(--white-pure);
+    }
+    .pull-quote-text .pq-word {
+      display: inline-block; opacity: 0; transform: translateY(50px);
+    }
+    .pull-quote-text .pq-word.pq-amber { color: var(--amber); }
+    .pull-quote-attr {
+      font-family: var(--font-mono); font-size: 0.6rem;
+      letter-spacing: 0.25em; text-transform: uppercase;
+      color: var(--fog); margin-top: 2rem; text-align: center;
+      opacity: 0;
+    }
+
+    /* ========== SECTION: HORIZONTAL TIMELINE ========== */
+    .timeline-section {
+      overflow: hidden; background: var(--charcoal);
+      border-top: 1px solid var(--ash);
+    }
+    .timeline-pin {
+      height: 100vh; display: flex; align-items: center;
+      position: relative;
+    }
+    .timeline-header {
+      position: absolute; top: 3rem; left: 3rem; z-index: 5;
+    }
+    .timeline-track {
+      display: flex; gap: 0; will-change: transform;
+    }
+    .timeline-card {
+      min-width: 45vw; max-width: 500px; height: 70vh;
+      flex-shrink: 0; padding: 4rem 3rem;
+      border-right: 1px solid var(--ash);
+      display: flex; flex-direction: column; justify-content: center;
+      position: relative;
+    }
+    .timeline-card:first-child { margin-left: 10vw; }
+    .timeline-card:last-child { margin-right: 20vw; }
+
+    .tl-year {
+      font-family: var(--font-display);
+      font-size: clamp(3rem, 6vw, 5rem);
+      font-weight: 900; color: var(--amber); line-height: 1;
+      margin-bottom: 1.5rem;
+    }
+    .tl-event {
+      font-family: var(--font-display);
+      font-size: 1.3rem; font-weight: 700;
+      color: var(--white-pure); margin-bottom: 1rem;
+      line-height: 1.3;
+    }
+    .tl-desc {
+      font-family: var(--font-body);
+      font-size: 0.95rem; font-weight: 300;
+      color: var(--fog); line-height: 1.7;
+      max-width: 380px;
+    }
+    .tl-line {
+      position: absolute; bottom: 3rem; left: 3rem; right: 3rem;
+      height: 1px; background: var(--ash);
+    }
+    .tl-line::after {
+      content: ''; position: absolute; left: 0; top: -3px;
+      width: 7px; height: 7px; background: var(--amber); border-radius: 50%;
+    }
+
+    /* ========== SECTION: THE FILM ========== */
+    .film-section {
+      padding: 10rem 0; background: var(--black);
+      position: relative;
+    }
+    .film-container { max-width: 1300px; margin: 0 auto; padding: 0 3rem; }
+
+    .film-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 6rem; align-items: center;
+    }
+    .film-info { display: flex; flex-direction: column; gap: 2rem; }
+    .film-headline {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 3.5vw, 3rem);
+      font-weight: 900; line-height: 1.1;
+      color: var(--white-pure);
+    }
+    .film-headline .hl { color: var(--amber); font-style: italic; }
+    .film-synopsis {
+      font-family: var(--font-body); font-size: 1.05rem; font-weight: 300;
+      line-height: 1.85; color: var(--mist);
+    }
+    .film-meta-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1rem;
+    }
+    .fm-item { display: flex; flex-direction: column; gap: 0.25rem; }
+    .fm-label {
+      font-family: var(--font-mono); font-size: 0.5rem;
+      letter-spacing: 0.3em; text-transform: uppercase; color: var(--smoke);
+    }
+    .fm-value {
+      font-family: var(--font-body); font-size: 0.9rem; font-weight: 400; color: var(--white);
+    }
+
+    /* Poster side — stylized */
+    .film-poster-wrap { position: relative; }
+    .film-poster-box {
+      aspect-ratio: 2/3; position: relative;
+      background: var(--graphite);
+      border: 1px solid var(--ash);
+      overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .film-poster-box .poster-inner {
+      text-align: center; padding: 3rem;
+    }
+    .poster-inner .poster-67 {
+      font-family: var(--font-display); font-size: 6rem;
+      font-weight: 900; color: var(--amber); line-height: 0.85;
+    }
+    .poster-inner .poster-title {
+      font-family: var(--font-mono); font-size: 0.65rem;
+      letter-spacing: 0.35em; text-transform: uppercase;
+      color: var(--white); margin-top: 1rem;
+    }
+    .poster-inner .poster-sub {
+      font-family: var(--font-display); font-size: 1.2rem;
+      font-style: italic; color: var(--fog); margin-top: 0.5rem;
+    }
+    /* Poster rings */
+    .poster-rings {
+      position: absolute; inset: 0; pointer-events: none; overflow: hidden;
+    }
+    .poster-rings .ring {
+      position: absolute; border: 1px solid var(--amber); border-radius: 50%;
+      top: 50%; left: 50%; transform: translate(-50%, -50%);
+      opacity: 0.06;
+    }
+    .poster-rings .ring:nth-child(1) { width: 200%; height: 200%; animation: ringPulse 4s ease-in-out infinite; }
+    .poster-rings .ring:nth-child(2) { width: 150%; height: 150%; opacity: 0.08; animation: ringPulse 4s ease-in-out 0.5s infinite; }
+    .poster-rings .ring:nth-child(3) { width: 100%; height: 100%; opacity: 0.1; animation: ringPulse 4s ease-in-out 1s infinite; }
+    @keyframes ringPulse {
+      0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.06; }
+      50% { transform: translate(-50%, -50%) scale(1.05); opacity: 0.12; }
+    }
+
+    /* ========== SECTION: LAURELS ========== */
+    .laurels-section {
+      padding: 5rem 0;
+      border-top: 1px solid var(--ash); border-bottom: 1px solid var(--ash);
+      background: var(--black-rich);
+    }
+    .laurels-container { max-width: 1300px; margin: 0 auto; padding: 0 3rem; }
+    .laurels-row {
+      display: flex; justify-content: center; gap: 5rem; flex-wrap: wrap; align-items: center;
+    }
+    .laurel {
+      text-align: center; opacity: 0; transform: translateY(20px);
+    }
+    .laurel-icon {
+      width: 48px; height: 48px; margin: 0 auto 0.75rem;
+      border: 1px solid var(--amber); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--amber); font-size: 1.2rem;
+    }
+    .laurel-name {
+      font-family: var(--font-mono); font-size: 0.6rem;
+      letter-spacing: 0.2em; text-transform: uppercase; color: var(--white);
+    }
+    .laurel-detail {
+      font-family: var(--font-mono); font-size: 0.5rem;
+      letter-spacing: 0.15em; text-transform: uppercase;
+      color: var(--amber); margin-top: 0.25rem;
+    }
+
+    /* ========== SECTION: TEAM ========== */
+    .team-section {
+      padding: 10rem 0; background: var(--black);
+      position: relative;
+    }
+    .team-container { max-width: 1300px; margin: 0 auto; padding: 0 3rem; }
+    .team-headline {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 3.5vw, 3rem);
+      font-weight: 900; color: var(--white-pure);
+      margin-bottom: 4rem;
+    }
+    .team-list { display: flex; flex-direction: column; }
+    .team-row {
+      display: grid; grid-template-columns: 200px 1fr;
+      gap: 3rem; padding: 2.5rem 0;
+      border-bottom: 1px solid var(--ash);
+      opacity: 0; transform: translateY(20px);
+      transition: background 0.3s;
+      align-items: start;
+    }
+    .team-row:first-child { border-top: 1px solid var(--ash); }
+    .team-row:hover { background: rgba(212,146,42,0.02); }
+
+    .team-role {
+      font-family: var(--font-mono); font-size: 0.5rem;
+      letter-spacing: 0.3em; text-transform: uppercase;
+      color: var(--amber); padding-top: 0.3rem;
+    }
+    .team-info { display: flex; flex-direction: column; gap: 0.5rem; }
+    .team-name {
+      font-family: var(--font-display);
+      font-size: 1.5rem; font-weight: 700; color: var(--white-pure);
+    }
+    .team-bio {
+      font-family: var(--font-body); font-size: 0.9rem; font-weight: 300;
+      color: var(--fog); line-height: 1.7; max-width: 600px;
+    }
+
+    /* ========== SECTION: NEWS ========== */
+    .news-section {
+      padding: 10rem 0; background: var(--charcoal);
+      position: relative;
+    }
+    .news-container { max-width: 1300px; margin: 0 auto; padding: 0 3rem; }
+    .news-note {
+      font-family: var(--font-body); font-size: 0.9rem; font-weight: 300;
+      color: var(--fog); max-width: 550px; margin-bottom: 3rem; line-height: 1.7;
+    }
+    .news-list { display: flex; flex-direction: column; }
+    .news-row {
+      display: grid; grid-template-columns: 2rem 1fr auto;
+      gap: 2rem; align-items: center;
+      padding: 1.8rem 0; border-bottom: 1px solid var(--ash);
+      opacity: 0; transform: translateY(15px);
+      transition: all 0.3s var(--ease-out-expo);
+    }
+    .news-row:first-child { border-top: 1px solid var(--ash); }
+    .news-row:hover { padding-left: 1rem; }
+    .news-row:hover .news-src { color: var(--amber); }
+    .news-idx {
+      font-family: var(--font-mono); font-size: 0.55rem; color: var(--smoke);
+    }
+    .news-title {
+      font-family: var(--font-body); font-size: 1rem; font-weight: 400;
+      color: var(--white); line-height: 1.4;
+    }
+    .news-src {
+      font-family: var(--font-mono); font-size: 0.5rem;
+      letter-spacing: 0.15em; text-transform: uppercase;
+      color: var(--smoke); transition: color 0.3s; white-space: nowrap;
+    }
+    .news-arrow { transition: transform 0.3s var(--ease-out-expo); display: inline-block; margin-left: 0.4rem; }
+    .news-row:hover .news-arrow { transform: translateX(4px); }
+
+    /* ========== SECTION: SCREENINGS ========== */
+    .screenings-section {
+      padding: 10rem 0; background: var(--black);
+      position: relative;
+    }
+    .screenings-container { max-width: 1300px; margin: 0 auto; padding: 0 3rem; }
+    .screenings-headline {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 3.5vw, 3rem);
+      font-weight: 900; color: var(--white-pure);
+      margin-bottom: 4rem;
+    }
+    .screenings-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+    .screening-card {
+      border: 1px solid var(--ash); padding: 2.5rem 2rem;
+      opacity: 0; transform: translateY(20px);
+      transition: all 0.4s var(--ease-out-expo);
+      position: relative; overflow: hidden;
+    }
+    .screening-card::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(212,146,42,0.04), transparent);
+      opacity: 0; transition: opacity 0.4s;
+    }
+    .screening-card:hover { border-color: var(--amber); }
+    .screening-card:hover::before { opacity: 1; }
+    .sc-city {
+      font-family: var(--font-display); font-size: 1.4rem; font-weight: 700;
+      color: var(--white-pure); margin-bottom: 0.4rem;
+    }
+    .sc-venue {
+      font-family: var(--font-body); font-size: 0.85rem; color: var(--fog);
+      margin-bottom: 1rem;
+    }
+    .sc-date {
+      font-family: var(--font-mono); font-size: 0.55rem;
+      letter-spacing: 0.2em; text-transform: uppercase; color: var(--amber);
+    }
+    .sc-status {
+      font-family: var(--font-mono); font-size: 0.5rem;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--smoke); margin-top: 0.3rem;
+    }
+
+    /* ========== CLOSING ========== */
+    .closing-section {
+      height: 100vh; min-height: 500px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center; position: relative;
+      background: var(--black); overflow: hidden;
+    }
+    .closing-bg-67 {
+      position: absolute; z-index: 0;
+      font-family: var(--font-display);
+      font-size: clamp(10rem, 40vw, 30rem);
+      font-weight: 900; color: var(--amber);
+      opacity: 0.04; line-height: 0.8; pointer-events: none;
+      transition: opacity 1.5s ease;
+    }
+    .closing-bg-67.active { opacity: 0.08; }
+    .closing-content { position: relative; z-index: 1; }
+    .closing-quote {
+      font-family: var(--font-display);
+      font-size: clamp(1.4rem, 2.8vw, 2.2rem);
+      font-weight: 400; font-style: italic;
+      color: var(--white); max-width: 650px;
+      line-height: 1.55; margin-bottom: 3rem; padding: 0 2rem;
+      opacity: 0;
+    }
+    .cta-btn {
+      display: inline-block; font-family: var(--font-mono);
+      font-size: 0.65rem; letter-spacing: 0.35em; text-transform: uppercase;
+      color: var(--black); background: var(--amber);
+      padding: 1.1rem 3.5rem; position: relative; overflow: hidden;
+      transition: color 0.4s; opacity: 0;
+    }
+    .cta-btn::before {
+      content: ''; position: absolute; inset: 0;
+      background: var(--white-pure);
+      transform: scaleX(0); transform-origin: right;
+      transition: transform 0.5s var(--ease-out-expo);
+    }
+    .cta-btn:hover::before { transform: scaleX(1); transform-origin: left; }
+    .cta-btn span { position: relative; z-index: 1; }
+
+    /* ========== FOOTER ========== */
+    .footer {
+      padding: 3rem 2.5rem; border-top: 1px solid var(--ash);
+      background: var(--black);
+    }
+    .footer-inner {
+      max-width: 1300px; margin: 0 auto;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .footer-copy {
+      font-family: var(--font-mono); font-size: 0.55rem;
+      letter-spacing: 0.15em; text-transform: uppercase; color: var(--smoke);
+    }
+    .footer-links { display: flex; gap: 1.5rem; }
+    .footer-links a {
+      font-family: var(--font-mono); font-size: 0.55rem;
+      letter-spacing: 0.15em; text-transform: uppercase;
+      color: var(--smoke); transition: color 0.3s;
+    }
+    .footer-links a:hover { color: var(--amber); }
+
+    /* ========== SECTION LABEL (reusable) ========== */
+    .sec-label {
+      font-family: var(--font-mono); font-size: 0.55rem;
+      letter-spacing: 0.4em; text-transform: uppercase;
+      color: var(--amber); margin-bottom: 2.5rem;
+      display: flex; align-items: center; gap: 1rem;
+      opacity: 0; transform: translateY(20px);
+    }
+    .sec-label::before { content: ''; width: 24px; height: 1px; background: var(--amber); }
+
+    /* ========== SECTION DIVIDER ========== */
+    .section-divider {
+      width: 100%; height: 1px; position: relative;
+      background: var(--ash);
+      overflow: hidden;
+    }
+    .section-divider::after {
+      content: ''; position: absolute; left: -100%; top: 0;
+      width: 100%; height: 100%;
+      background: linear-gradient(90deg, transparent, var(--amber), transparent);
+      animation: dividerSweep 4s ease-in-out infinite;
+    }
+    @keyframes dividerSweep {
+      0% { left: -100%; } 100% { left: 100%; }
+    }
+
+    /* ========== RESPONSIVE ========== */
+    @media (max-width: 1024px) {
+      .film-grid { grid-template-columns: 1fr; gap: 4rem; }
+      .film-poster-wrap { max-width: 400px; order: -1; }
+      .screenings-grid { grid-template-columns: repeat(2, 1fr); }
+      .team-row { grid-template-columns: 1fr; gap: 0.5rem; }
+      .timeline-card { min-width: 70vw; }
+    }
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .screenings-grid { grid-template-columns: 1fr; }
+      .film-meta-grid { grid-template-columns: 1fr; }
+      .news-row { grid-template-columns: 1fr; gap: 0.3rem; }
+      .news-idx { display: none; }
+      .laurels-row { gap: 2.5rem; }
+      .footer-inner { flex-direction: column; gap: 1rem; text-align: center; }
+      .timeline-card { min-width: 85vw; }
+      .timeline-card:first-child { margin-left: 5vw; }
+    }
+  </style>
+</head>
+<body>
+  <div class="grain"></div>
+  <div class="flash" id="flash"></div>
+  <div class="cursor" id="cursor"></div>
+  <div class="progress-bar" id="progressBar"></div>
+
+  <!-- LOADER -->
+  <div class="loader" id="loader">
+    <div class="loader-count" id="loaderCount">0</div>
+    <div class="loader-sub">Bombs detonated in the Marshall Islands</div>
+    <div class="loader-bar"><div class="loader-bar-fill" id="loaderBarFill"></div></div>
+  </div>
+
+  <!-- NAV -->
+  <nav class="nav">
+    <a href="#" class="nav-logo">67 Bombs</a>
+    <ul class="nav-links">
+      <li><a href="#story" data-nav>Story</a></li>
+      <li><a href="#film" data-nav>Film</a></li>
+      <li><a href="#team" data-nav>Team</a></li>
+      <li><a href="#screenings" data-nav>Screenings</a></li>
+      <li><a href="#news" data-nav>News</a></li>
+    </ul>
+  </nav>
+
+  <!-- ===== HERO ===== -->
+  <section class="hero" id="hero">
+    <div class="hero-pin" id="heroPin">
+      <canvas class="hero-canvas" id="heroCanvas"></canvas>
+      <div class="hero-content" id="heroContent">
+        <p class="hero-eyebrow">From Executive Producer Errol Morris</p>
+        <h1 class="hero-title"><span class="n67">67</span> Bombs</h1>
+        <p class="hero-subtitle">to Enid</p>
+        <p class="hero-tagline">An intimate documentary about survivors of nuclear weapons testing in the Marshall Islands who built new lives in rural America.</p>
+      </div>
+      <div class="hero-scroll-cue" id="heroScrollCue">
+        <span>Scroll to explore</span>
+        <div class="scroll-tick"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== COUNTER MARQUEE ===== -->
+  <section class="marquee">
+    <div class="marquee-track" id="marqueeTrack">
+      <div class="marquee-item"><span class="val">67</span>Nuclear detonations</div>
+      <div class="marquee-item"><span class="val">12</span>Years of testing</div>
+      <div class="marquee-item"><span class="val">15MT</span>Castle Bravo yield</div>
+      <div class="marquee-item"><span class="val">1000&times;</span>More powerful than Hiroshima</div>
+      <div class="marquee-item"><span class="val">4</span>Years of filmmaking</div>
+      <div class="marquee-item"><span class="val">&infin;</span>Generations affected</div>
+      <div class="marquee-item"><span class="val">67</span>Nuclear detonations</div>
+      <div class="marquee-item"><span class="val">12</span>Years of testing</div>
+      <div class="marquee-item"><span class="val">15MT</span>Castle Bravo yield</div>
+      <div class="marquee-item"><span class="val">1000&times;</span>More powerful than Hiroshima</div>
+      <div class="marquee-item"><span class="val">4</span>Years of filmmaking</div>
+      <div class="marquee-item"><span class="val">&infin;</span>Generations affected</div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- ===== STORY: CHAPTER 1 ===== -->
+  <section class="story-section" id="story">
+    <div class="story-pin" id="storyPin1">
+      <div class="story-bg-number">67</div>
+      <div class="story-pin-content">
+        <div class="story-chapter-label">Chapter 01 — The Testing</div>
+        <h2 class="story-big-text">
+          Between 1946 and 1958, the United States detonated <span class="hl">67 nuclear weapons</span> in the Marshall Islands.
+        </h2>
+        <p class="story-body">
+          The blasts were massive. Castle Bravo alone — detonated on March 1, 1954 — yielded 15 megatons, a thousand times more powerful than the bomb dropped on Hiroshima. The fallout contaminated islands, ocean, and people hundreds of miles away.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== STORY: CHAPTER 2 ===== -->
+  <section class="story-section">
+    <div class="story-pin" id="storyPin2">
+      <div class="story-bg-number" style="opacity:0.025">EN</div>
+      <div class="story-pin-content">
+        <div class="story-chapter-label">Chapter 02 — The Displacement</div>
+        <h2 class="story-big-text">
+          Elevated cancer rates followed. Land became <span class="hl">irradiated</span>. Food was poisoned. Families fled the only home they'd ever known.
+        </h2>
+        <p class="story-body">
+          Many Marshallese scattered across the Pacific and eventually to the United States. Through mission work and community networks, a significant population found their way to an unlikely destination: Enid, Oklahoma — a small city in the heart of rural America, thousands of miles from the islands they once called home.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== PULL QUOTE ===== -->
+  <section class="pull-quote-section" id="pullQuote">
+    <div class="pq-bg"></div>
+    <div style="position:relative; z-index:1;">
+      <h2 class="pull-quote-text" id="pqText">
+        These are people who are overcoming trauma and building lives here — thousands of miles from a homeland they can never return to.
+      </h2>
+      <p class="pull-quote-attr" id="pqAttr">— Brandon Kobs, Producer</p>
+    </div>
+  </section>
+
+  <!-- ===== HORIZONTAL TIMELINE ===== -->
+  <section class="timeline-section" id="timelineSection">
+    <div class="timeline-pin" id="timelinePin">
+      <div class="timeline-header">
+        <div class="sec-label" style="opacity:1; transform:none;">Timeline</div>
+      </div>
+      <div class="timeline-track" id="timelineTrack">
+        <div class="timeline-card">
+          <div class="tl-year">1946</div>
+          <div class="tl-event">Operation Crossroads</div>
+          <div class="tl-desc">The United States begins nuclear weapons testing at Bikini Atoll. Residents are relocated with promises they can return. They never will.</div>
+          <div class="tl-line"></div>
+        </div>
+        <div class="timeline-card">
+          <div class="tl-year">1954</div>
+          <div class="tl-event">Castle Bravo</div>
+          <div class="tl-desc">The largest U.S. nuclear test detonates at 15 megatons. Radioactive fallout spreads across inhabited islands, contaminating people, water, and food for generations.</div>
+          <div class="tl-line"></div>
+        </div>
+        <div class="timeline-card">
+          <div class="tl-year">1958</div>
+          <div class="tl-event">Final Detonation</div>
+          <div class="tl-desc">The 67th and final nuclear test. The cumulative radiation has devastated the environment and the health of the Marshallese people irreversibly.</div>
+          <div class="tl-line"></div>
+        </div>
+        <div class="timeline-card">
+          <div class="tl-year">1986</div>
+          <div class="tl-event">Compact of Free Association</div>
+          <div class="tl-desc">Marshallese citizens gain the right to live and work in the United States. A diaspora begins as many seek healthcare and opportunity far from irradiated homelands.</div>
+          <div class="tl-line"></div>
+        </div>
+        <div class="timeline-card">
+          <div class="tl-year">2000s</div>
+          <div class="tl-event">A Community Takes Root</div>
+          <div class="tl-desc">Through church networks and word of mouth, Marshallese families build new lives in Enid, Oklahoma — carrying their culture, their trauma, and their resilience.</div>
+          <div class="tl-line"></div>
+        </div>
+        <div class="timeline-card">
+          <div class="tl-year">2024</div>
+          <div class="tl-event">67 Bombs to Enid Premieres</div>
+          <div class="tl-desc">After four years of filmmaking, the documentary premieres — winning Best Documentary at deadCenter and catching the attention of the United Nations.</div>
+          <div class="tl-line"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- ===== THE FILM ===== -->
+  <section class="film-section" id="film">
+    <div class="film-container">
+      <div class="sec-label">The Film</div>
+      <div class="film-grid">
+        <div class="film-info">
+          <h2 class="film-headline">
+            An intimate portrait of survival, culture, and <span class="hl">resilience</span>
+          </h2>
+          <p class="film-synopsis">
+            From Executive Producer Errol Morris, <em>67 Bombs to Enid</em> is a character-driven documentary by Kevin Ford and Ty McMahan. What begins as a historical inquiry into the legacy of American nuclear testing becomes a deeply human portrait — of displacement and community, of trauma passed through generations, and of the extraordinary resilience of people building new lives in an unlikely place.
+          </p>
+          <div class="film-meta-grid">
+            <div class="fm-item"><span class="fm-label">Executive Producer</span><span class="fm-value">Errol Morris</span></div>
+            <div class="fm-item"><span class="fm-label">Directors</span><span class="fm-value">Kevin Ford &amp; Ty McMahan</span></div>
+            <div class="fm-item"><span class="fm-label">Producer</span><span class="fm-value">Brandon Kobs</span></div>
+            <div class="fm-item"><span class="fm-label">Editor</span><span class="fm-value">Zach Passero</span></div>
+            <div class="fm-item"><span class="fm-label">Music</span><span class="fm-value">Joseph Cash &amp; Aaron Newberry</span></div>
+            <div class="fm-item"><span class="fm-label">Production</span><span class="fm-value">Allsweet</span></div>
+          </div>
+        </div>
+        <div class="film-poster-wrap">
+          <div class="film-poster-box">
+            <div class="poster-rings">
+              <div class="ring"></div>
+              <div class="ring"></div>
+              <div class="ring"></div>
+            </div>
+            <div class="poster-inner">
+              <div class="poster-67">67</div>
+              <div class="poster-title">Bombs to Enid</div>
+              <div class="poster-sub">A Documentary Film</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== LAURELS ===== -->
+  <section class="laurels-section" id="laurels">
+    <div class="laurels-container">
+      <div class="laurels-row">
+        <div class="laurel">
+          <div class="laurel-icon">&#9733;</div>
+          <div class="laurel-name">deadCenter Film Festival</div>
+          <div class="laurel-detail">Best Documentary</div>
+        </div>
+        <div class="laurel">
+          <div class="laurel-icon">&#9733;</div>
+          <div class="laurel-name">United Nations</div>
+          <div class="laurel-detail">Cited in Human Rights Report</div>
+        </div>
+        <div class="laurel">
+          <div class="laurel-icon">&#9733;</div>
+          <div class="laurel-name">Special Screenings</div>
+          <div class="laurel-detail">Los Angeles &amp; New York City</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- ===== TEAM ===== -->
+  <section class="team-section" id="team">
+    <div class="team-container">
+      <div class="sec-label">The Team</div>
+      <h2 class="team-headline">The filmmakers behind the story</h2>
+      <div class="team-list">
+        <div class="team-row">
+          <div class="team-role">Executive Producer</div>
+          <div class="team-info">
+            <div class="team-name">Errol Morris</div>
+            <div class="team-bio">Academy Award-winning documentarian known for The Thin Blue Line, The Fog of War, and pioneering the art of documentary cinema.</div>
+          </div>
+        </div>
+        <div class="team-row">
+          <div class="team-role">Co-Director / DP</div>
+          <div class="team-info">
+            <div class="team-name">Kevin Ford</div>
+            <div class="team-bio">Produced, shot, and edited the Netflix documentary Sr. (National Board of Review Best Documentary, 2022). Director of The Bomb, premiered at Tribeca and Berlinale, and featured at the Nobel Peace Awards ceremony.</div>
+          </div>
+        </div>
+        <div class="team-row">
+          <div class="team-role">Co-Director</div>
+          <div class="team-info">
+            <div class="team-name">Ty McMahan</div>
+            <div class="team-bio">Former Wall Street Journal reporter turned filmmaker. Directed The Toy Cart (PBS) and The 34 Project. Debut feature The Mundo King released on Amazon.</div>
+          </div>
+        </div>
+        <div class="team-row">
+          <div class="team-role">Producer / In Film</div>
+          <div class="team-info">
+            <div class="team-name">Brandon Kobs</div>
+            <div class="team-bio">Owner of Allsweet, an OKC production company. Over a decade of work on productions for Netflix, Nike, and Travel Channel. Four years dedicated to bringing this story to light.</div>
+          </div>
+        </div>
+        <div class="team-row">
+          <div class="team-role">Editor / Co-Producer</div>
+          <div class="team-info">
+            <div class="team-name">Zach Passero</div>
+            <div class="team-bio">Editor and co-producer whose meticulous craft shaped the narrative arc of the film across four years of footage.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== NEWS ===== -->
+  <section class="news-section" id="news">
+    <div class="news-container">
+      <div class="sec-label">News About Nuclear Testing</div>
+      <p class="news-note">The legacy of nuclear weapons testing continues to shape lives and policy worldwide. These stories provide context for the issues at the heart of the film.</p>
+      <div class="news-list">
+        <a href="https://www.armscontrol.org/act/2024-04/news/marshall-islands-seeks-us-nuclear-legacy-compensation" target="_blank" rel="noopener" class="news-row">
+          <span class="news-idx">01</span>
+          <span class="news-title">Marshall Islands Seeks U.S. Nuclear Legacy Compensation</span>
+          <span class="news-src">Arms Control Assoc. <span class="news-arrow">&rarr;</span></span>
+        </a>
+        <a href="https://www.bbc.com/news/world-asia-pacific-15588129" target="_blank" rel="noopener" class="news-row">
+          <span class="news-idx">02</span>
+          <span class="news-title">Marshall Islands Profile — The Legacy of Nuclear Testing</span>
+          <span class="news-src">BBC News <span class="news-arrow">&rarr;</span></span>
+        </a>
+        <a href="https://www.nytimes.com/2024/03/01/science/castle-bravo-nuclear-test-anniversary.html" target="_blank" rel="noopener" class="news-row">
+          <span class="news-idx">03</span>
+          <span class="news-title">70 Years After Castle Bravo — The Fallout That Changed Everything</span>
+          <span class="news-src">New York Times <span class="news-arrow">&rarr;</span></span>
+        </a>
+        <a href="https://www.theguardian.com/world/marshall-islands" target="_blank" rel="noopener" class="news-row">
+          <span class="news-idx">04</span>
+          <span class="news-title">Marshall Islands — Nuclear Legacy and Climate Crisis</span>
+          <span class="news-src">The Guardian <span class="news-arrow">&rarr;</span></span>
+        </a>
+        <a href="https://www.atomicheritage.org/history/castle-bravo" target="_blank" rel="noopener" class="news-row">
+          <span class="news-idx">05</span>
+          <span class="news-title">Castle Bravo — The Worst Nuclear Test in U.S. History</span>
+          <span class="news-src">Atomic Heritage <span class="news-arrow">&rarr;</span></span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SCREENINGS ===== -->
+  <section class="screenings-section" id="screenings">
+    <div class="screenings-container">
+      <div class="sec-label">Screenings</div>
+      <h2 class="screenings-headline">See it in theaters</h2>
+      <div class="screenings-grid">
+        <div class="screening-card">
+          <div class="sc-city">Dallas</div>
+          <div class="sc-venue">The Texas Theatre</div>
+          <div class="sc-date">December 2025</div>
+          <div class="sc-status">Now Showing</div>
+        </div>
+        <div class="screening-card">
+          <div class="sc-city">Oklahoma City</div>
+          <div class="sc-venue">Venue TBA</div>
+          <div class="sc-date">2026</div>
+          <div class="sc-status">Coming Soon</div>
+        </div>
+        <div class="screening-card">
+          <div class="sc-city">Chicago</div>
+          <div class="sc-venue">Venue TBA</div>
+          <div class="sc-date">2026</div>
+          <div class="sc-status">Coming Soon</div>
+        </div>
+        <div class="screening-card">
+          <div class="sc-city">Atlanta</div>
+          <div class="sc-venue">Venue TBA</div>
+          <div class="sc-date">2026</div>
+          <div class="sc-status">Coming Soon</div>
+        </div>
+        <div class="screening-card">
+          <div class="sc-city">Seattle</div>
+          <div class="sc-venue">Venue TBA</div>
+          <div class="sc-date">2026</div>
+          <div class="sc-status">Coming Soon</div>
+        </div>
+        <div class="screening-card">
+          <div class="sc-city">Washington DC</div>
+          <div class="sc-venue">Venue TBA</div>
+          <div class="sc-date">2026</div>
+          <div class="sc-status">Coming Soon</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CLOSING ===== -->
+  <section class="closing-section" id="closing">
+    <div class="closing-bg-67">0</div>
+    <div class="closing-content">
+      <p class="closing-quote">"It puts a real human face on the dangers of nuclear testing. But just as important, it shows the triumphs."</p>
+      <a href="mailto:info@67bombs.com" class="cta-btn"><span>Get in Touch</span></a>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-copy">&copy; 2026 67 Bombs to Enid. All rights reserved.</div>
+      <div class="footer-links">
+        <a href="https://www.instagram.com/67bombs/" target="_blank" rel="noopener">Instagram</a>
+        <a href="https://www.facebook.com/67bombs" target="_blank" rel="noopener">Facebook</a>
+        <a href="https://letterboxd.com/film/67-bombs-to-enid/" target="_blank" rel="noopener">Letterboxd</a>
+        <a href="https://www.imdb.com/title/tt34508151/" target="_blank" rel="noopener">IMDb</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ===== SCRIPTS ===== -->
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+
+    /* ========== LENIS SMOOTH SCROLL ========== */
+    let lenis;
+    try {
+      lenis = new Lenis({
+        duration: 1.2,
+        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+        touchMultiplier: 2,
+      });
+      function raf(time) { lenis.raf(time); requestAnimationFrame(raf); }
+      requestAnimationFrame(raf);
+    } catch(e) { /* Lenis not loaded, graceful degradation */ }
+
+    /* ========== CURSOR ========== */
+    const cursor = document.getElementById('cursor');
+    let mx = 0, my = 0, cx = 0, cy = 0;
+    document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+    (function animCursor() {
+      cx += (mx - cx) * 0.1; cy += (my - cy) * 0.1;
+      cursor.style.left = cx + 'px'; cursor.style.top = cy + 'px';
+      requestAnimationFrame(animCursor);
+    })();
+    document.querySelectorAll('a, button, .cta-btn, .screening-card, .news-row').forEach(el => {
+      el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
+      el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
+    });
+    if ('ontouchstart' in window) cursor.style.display = 'none';
+
+    /* ========== LETTER SPLIT HERO TITLE ========== */
+    function splitLetters(el) {
+      const html = el.innerHTML;
+      // Process the n67 span and the " Bombs" text
+      el.innerHTML = '';
+      const parts = html.split(/(<span class="n67">.*?<\/span>)/);
+      parts.forEach(part => {
+        if (part.includes('n67')) {
+          // Extract inner text of the span
+          const inner = part.replace(/<[^>]*>/g, '');
+          const wrapper = document.createElement('span');
+          wrapper.className = 'n67';
+          inner.split('').forEach(ch => {
+            const s = document.createElement('span');
+            s.className = 'char';
+            s.textContent = ch;
+            wrapper.appendChild(s);
+          });
+          el.appendChild(wrapper);
+        } else {
+          part.split('').forEach(ch => {
+            if (ch === ' ') {
+              el.appendChild(document.createTextNode(' '));
+            } else {
+              const s = document.createElement('span');
+              s.className = 'char';
+              s.textContent = ch;
+              el.appendChild(s);
+            }
+          });
+        }
+      });
+    }
+    const heroTitle = document.querySelector('.hero-title');
+    splitLetters(heroTitle);
+
+    /* ========== SHOCKWAVE CANVAS ========== */
+    const canvas = document.getElementById('heroCanvas');
+    const ctx = canvas.getContext('2d');
+    let cw, ch;
+    function resize() { cw = canvas.width = window.innerWidth; ch = canvas.height = window.innerHeight; }
+    resize(); window.addEventListener('resize', resize);
+
+    const rings = [];
+    class Ring {
+      constructor(delay) {
+        this.delay = delay;
+        this.r = 0; this.maxR = Math.max(cw, ch) * 0.9;
+        this.opacity = 0; this.started = false; this.done = false;
+        this.speed = 1.5 + Math.random() * 0.5;
+      }
+      update(elapsed) {
+        if (elapsed < this.delay) return;
+        this.started = true;
+        this.r += this.speed;
+        const p = this.r / this.maxR;
+        this.opacity = p < 0.3 ? p / 0.3 * 0.3 : 0.3 * (1 - (p - 0.3) / 0.7);
+        if (this.r > this.maxR) this.done = true;
+      }
+      draw() {
+        if (!this.started || this.done) return;
+        ctx.beginPath();
+        ctx.arc(cw / 2, ch / 2, this.r, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(212, 146, 42, ${Math.max(0, this.opacity)})`;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+    }
+    for (let i = 0; i < 12; i++) rings.push(new Ring(i * 350));
+
+    const particles = [];
+    class Particle {
+      constructor() { this.reset(); }
+      reset() {
+        this.x = Math.random() * cw; this.y = Math.random() * ch;
+        this.size = Math.random() * 1.2 + 0.3;
+        this.vx = (Math.random() - 0.5) * 0.2;
+        this.vy = (Math.random() - 0.5) * 0.2;
+        this.alpha = Math.random() * 0.35 + 0.05;
+        this.life = Math.random() * 300 + 150;
+        this.maxLife = this.life;
+      }
+      update() {
+        this.x += this.vx; this.y += this.vy; this.life--;
+        if (this.life <= 0 || this.x < -10 || this.x > cw + 10 || this.y < -10 || this.y > ch + 10) this.reset();
+      }
+      draw() {
+        const a = this.alpha * (this.life / this.maxLife);
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(212, 146, 42, ${a})`;
+        ctx.fill();
+      }
+    }
+    for (let i = 0; i < 90; i++) particles.push(new Particle());
+
+    let startTime = null;
+    function animateCanvas(ts) {
+      if (!startTime) startTime = ts;
+      const elapsed = ts - startTime;
+      ctx.clearRect(0, 0, cw, ch);
+      const grd = ctx.createRadialGradient(cw/2, ch/2, 0, cw/2, ch/2, cw * 0.5);
+      grd.addColorStop(0, 'rgba(212, 146, 42, 0.02)');
+      grd.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = grd;
+      ctx.fillRect(0, 0, cw, ch);
+      rings.forEach(r => { r.update(elapsed); r.draw(); });
+      particles.forEach(p => { p.update(); p.draw(); });
+      if (rings.every(r => r.done)) {
+        startTime = ts;
+        rings.forEach((r, i) => {
+          r.r = 0; r.opacity = 0; r.started = false; r.done = false; r.delay = i * 350;
+          r.maxR = Math.max(cw, ch) * 0.9;
+        });
+      }
+      requestAnimationFrame(animateCanvas);
+    }
+    requestAnimationFrame(animateCanvas);
+
+    /* ========== LOADER ========== */
+    const loader = document.getElementById('loader');
+    const loaderCount = document.getElementById('loaderCount');
+    const loaderBarFill = document.getElementById('loaderBarFill');
+    const flash = document.getElementById('flash');
+    let loadVal = 0;
+    const loadInterval = setInterval(() => {
+      loadVal++;
+      if (loadVal > 67) {
+        loadVal = 67; clearInterval(loadInterval);
+        // Detonation flash
+        setTimeout(() => {
+          flash.style.transition = 'opacity 0.08s';
+          flash.style.opacity = '0.85';
+          setTimeout(() => {
+            flash.style.transition = 'opacity 1.2s ease-out';
+            flash.style.opacity = '0';
+            loader.classList.add('done');
+            initGSAP();
+          }, 120);
+        }, 300);
+      }
+      loaderCount.textContent = loadVal;
+      loaderBarFill.style.width = (loadVal / 67 * 100) + '%';
+    }, 30);
+
+    /* ========== GSAP INIT ========== */
+    function initGSAP() {
+      gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
+
+      // Lenis + ScrollTrigger sync
+      if (lenis) {
+        lenis.on('scroll', ScrollTrigger.update);
+        gsap.ticker.add((time) => { lenis.raf(time * 1000); });
+        gsap.ticker.lagSmoothing(0);
+      }
+
+      // Progress bar
+      gsap.to('#progressBar', {
+        width: '100%', ease: 'none',
+        scrollTrigger: { trigger: 'body', start: 'top top', end: 'bottom bottom', scrub: 0.3 }
+      });
+
+      // Hero letter-by-letter entrance with staggered 3D flip
+      const chars = document.querySelectorAll('.hero-title .char');
+      const htl = gsap.timeline({ delay: 0.15 });
+      htl
+        .to('.hero-eyebrow', { opacity: 1, y: 0, duration: 1, ease: 'expo.out' })
+        .to(chars, {
+          opacity: 1, y: 0, rotateX: 0,
+          stagger: { each: 0.04, from: 'center' },
+          duration: 1, ease: 'back.out(1.2)'
+        }, '-=0.5')
+        .to('.hero-subtitle', { opacity: 1, y: 0, duration: 1, ease: 'expo.out' }, '-=0.5')
+        .to('.hero-tagline', { opacity: 1, duration: 1, ease: 'expo.out' }, '-=0.5')
+        .to('#heroScrollCue', { opacity: 1, duration: 0.7 }, '-=0.3');
+
+      // Hero pin + parallax
+      ScrollTrigger.create({
+        trigger: '.hero',
+        start: 'top top',
+        end: 'bottom bottom',
+        pin: '#heroPin',
+        pinSpacing: false,
+      });
+
+      gsap.to('#heroContent', {
+        yPercent: -30, opacity: 0, scale: 0.92, ease: 'none',
+        scrollTrigger: { trigger: '.hero', start: 'top top', end: '60% top', scrub: true }
+      });
+
+      // Variable font weight on scroll
+      ScrollTrigger.create({
+        trigger: '.hero',
+        start: 'top top',
+        end: 'bottom top',
+        scrub: true,
+        onUpdate: (self) => {
+          const w = Math.round(900 - self.progress * 700);
+          heroTitle.style.fontWeight = w;
+        }
+      });
+
+      gsap.to('#heroScrollCue', {
+        opacity: 0, ease: 'none',
+        scrollTrigger: { trigger: '.hero', start: '8% top', end: '18% top', scrub: true }
+      });
+
+      // Story sections reveal
+      document.querySelectorAll('.story-pin').forEach(pin => {
+        const els = pin.querySelectorAll('.story-chapter-label, .story-big-text, .story-body');
+        gsap.fromTo(els, { opacity: 0, y: 50 }, {
+          opacity: 1, y: 0, stagger: 0.15, duration: 1, ease: 'expo.out',
+          scrollTrigger: { trigger: pin, start: 'top 70%', toggleActions: 'play none none none' }
+        });
+      });
+
+      // Pull quote word-by-word with scrub
+      const pqEl = document.getElementById('pqText');
+      const pqText = pqEl.textContent.trim();
+      pqEl.innerHTML = '';
+      const pqHighlight = ['overcoming', 'trauma', 'building', 'lives', 'never', 'return'];
+      pqText.split(' ').forEach(w => {
+        const s = document.createElement('span');
+        s.className = 'pq-word';
+        if (pqHighlight.includes(w.toLowerCase().replace(/[^a-z]/g, ''))) s.classList.add('pq-amber');
+        s.textContent = w + ' ';
+        pqEl.appendChild(s);
+      });
+
+      const pqWords = gsap.utils.toArray('.pq-word');
+      gsap.to(pqWords, {
+        opacity: 1, y: 0,
+        stagger: 0.03, ease: 'none',
+        scrollTrigger: {
+          trigger: '#pullQuote',
+          start: 'top 65%',
+          end: 'center center',
+          scrub: 0.5,
+        }
+      });
+      gsap.to('#pqAttr', {
+        opacity: 1, duration: 0.8,
+        scrollTrigger: { trigger: '#pullQuote', start: 'center 55%', toggleActions: 'play none none none' }
+      });
+
+      // Horizontal timeline
+      const tlTrack = document.getElementById('timelineTrack');
+      const totalScrollWidth = tlTrack.scrollWidth;
+
+      gsap.to(tlTrack, {
+        x: () => -(totalScrollWidth - window.innerWidth + 100),
+        ease: 'none',
+        scrollTrigger: {
+          trigger: '#timelineSection',
+          start: 'top top',
+          end: () => '+=' + totalScrollWidth,
+          pin: '#timelinePin',
+          scrub: 1,
+          invalidateOnRefresh: true,
+        }
+      });
+
+      // Timeline card reveal on horizontal scroll
+      document.querySelectorAll('.timeline-card').forEach(card => {
+        gsap.fromTo(card,
+          { opacity: 0.3, y: 30 },
+          {
+            opacity: 1, y: 0, duration: 0.5, ease: 'expo.out',
+            scrollTrigger: {
+              trigger: card,
+              containerAnimation: gsap.getById && false, // cards animate via visibility
+              start: 'left 80%',
+              toggleActions: 'play none none none',
+              horizontal: true,
+            }
+          }
+        );
+      });
+
+      // Generic reveal for sec-labels and headlines
+      gsap.utils.toArray('.sec-label, .film-headline, .film-synopsis, .film-meta-grid, .film-poster-wrap, .screenings-headline, .news-note, .team-headline').forEach(el => {
+        gsap.fromTo(el, { opacity: 0, y: 30 }, {
+          opacity: 1, y: 0, duration: 0.9, ease: 'expo.out',
+          scrollTrigger: { trigger: el, start: 'top 85%', toggleActions: 'play none none none' }
+        });
+      });
+
+      // Team rows
+      document.querySelectorAll('.team-row').forEach((row, i) => {
+        gsap.to(row, {
+          opacity: 1, y: 0, duration: 0.7, ease: 'expo.out',
+          scrollTrigger: { trigger: row, start: 'top 85%', toggleActions: 'play none none none' },
+          delay: i * 0.05,
+        });
+      });
+
+      // Laurels
+      document.querySelectorAll('.laurel').forEach((l, i) => {
+        gsap.to(l, {
+          opacity: 1, y: 0, duration: 0.7, ease: 'expo.out',
+          scrollTrigger: { trigger: l, start: 'top 85%', toggleActions: 'play none none none' },
+          delay: i * 0.12,
+        });
+      });
+
+      // News rows
+      document.querySelectorAll('.news-row').forEach((row, i) => {
+        gsap.to(row, {
+          opacity: 1, y: 0, duration: 0.5, ease: 'expo.out',
+          scrollTrigger: { trigger: row, start: 'top 88%', toggleActions: 'play none none none' },
+          delay: i * 0.06,
+        });
+      });
+
+      // Screening cards
+      document.querySelectorAll('.screening-card').forEach((card, i) => {
+        gsap.to(card, {
+          opacity: 1, y: 0, duration: 0.7, ease: 'expo.out',
+          scrollTrigger: { trigger: card, start: 'top 85%', toggleActions: 'play none none none' },
+          delay: i * 0.08,
+        });
+      });
+
+      // Closing — counter from 0→67 on the background number
+      const closingNum = document.querySelector('.closing-bg-67');
+      let closingCounted = false;
+      ScrollTrigger.create({
+        trigger: '.closing-section',
+        start: 'top 70%',
+        onEnter: () => {
+          if (closingCounted) return;
+          closingCounted = true;
+          closingNum.classList.add('active');
+          let cv = 0;
+          const ci = setInterval(() => {
+            cv++;
+            if (cv > 67) { cv = 67; clearInterval(ci); }
+            closingNum.textContent = cv;
+          }, 25);
+        },
+        once: true,
+      });
+
+      gsap.to('.closing-quote', {
+        opacity: 1, duration: 1.2, ease: 'expo.out',
+        scrollTrigger: { trigger: '.closing-section', start: 'top 60%', toggleActions: 'play none none none' }
+      });
+      gsap.to('.cta-btn', {
+        opacity: 1, duration: 0.8, delay: 0.4, ease: 'expo.out',
+        scrollTrigger: { trigger: '.closing-section', start: 'top 60%', toggleActions: 'play none none none' }
+      });
+
+      // Nav smooth scroll (works with Lenis)
+      document.querySelectorAll('[data-nav]').forEach(link => {
+        link.addEventListener('click', e => {
+          e.preventDefault();
+          const target = document.querySelector(link.getAttribute('href'));
+          if (target) {
+            if (lenis) {
+              lenis.scrollTo(target, { offset: 0, duration: 1.5 });
+            } else {
+              gsap.to(window, { duration: 1.2, scrollTo: { y: target, offsetY: 0 }, ease: 'expo.inOut' });
+            }
+          }
+        });
+      });
+    }
+  });
+  </script>
+</body>
+</html>
