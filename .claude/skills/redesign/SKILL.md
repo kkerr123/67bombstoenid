@@ -1,16 +1,8 @@
 ---
 name: redesign
-description: >
-  Redesign any website as a modern, breathtaking, award-winning web experience.
-  Analyzes the existing site, researches design inspiration from Awwwards and
-  reference sites, builds a complete HTML/CSS/JS implementation with scroll-driven
-  animations, variable typography, immersive interactions, and bold brand identity.
-  Then self-critiques 3 times as a creative director and iterates.
-when_to_use: >
-  When the user wants to redesign a website, create an immersive web experience,
-  build a branded website, make a site more modern or visually stunning, or create
-  an award-worthy web design.
-argument-hint: <url> [reference-urls...]
+description: "Redesign any website into a modern, award-winning immersive web experience with scroll animations, variable typography, and bold brand identity. Self-critiques 3 times as creative director."
+when_to_use: "When the user wants to redesign a website, create an immersive web experience, or make a site visually stunning."
+argument-hint: "<url> [reference-urls...]"
 user-invocable: true
 disable-model-invocation: false
 allowed-tools: Read Write Edit Bash(curl *) Bash(wc *) WebFetch WebSearch Glob Grep Agent
